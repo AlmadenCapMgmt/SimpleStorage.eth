@@ -1,179 +1,122 @@
-# Simple Storage Smart Contract
+# StringStorage Smart Contract
 
-A basic Ethereum smart contract for testing and learning purposes. This contract demonstrates fundamental blockchain concepts including state storage, gas usage, and event emission.
+A secure string storage smart contract built with Solidity that allows only the owner to write data while enabling public read access.
 
-## What is SimpleStorage?
+## Contract Overview
 
-SimpleStorage is a minimal smart contract that allows you to:
-- Store a single integer value on the blockchain
-- Retrieve the stored value
-- Track changes through blockchain events
+The StringStorage contract provides:
+- **Secure string storage**: Store and retrieve string values on the blockchain
+- **Owner-only write access**: Only the contract deployer can modify the stored string
+- **Public read access**: Anyone can read the stored string
+- **Ownership management**: Transfer ownership to another address
+- **Event logging**: Track all string updates and ownership changes
 
-## Use Cases
+## Contract Functions
 
-### 1. Learning & Education
-- **Blockchain Fundamentals**: Understand how data is stored permanently on the blockchain
-- **Gas Optimization**: Learn about transaction costs for storage operations
-- **Event Logging**: See how smart contracts can emit events for off-chain monitoring
+### Public Functions
+- `getString()` - Returns the stored string (readable by anyone)
+- `owner()` - Returns the current owner address
 
-### 2. Testing Infrastructure
-- **Network Testing**: Verify testnet connectivity and wallet configuration
-- **Deployment Pipelines**: Test automated deployment scripts
-- **Integration Testing**: Practice integrating smart contracts with dApps
+### Owner-Only Functions
+- `setString(string memory newString)` - Updates the stored string
+- `transferOwnership(address newOwner)` - Transfers contract ownership
 
-### 3. Development Foundation
-- **Contract Templates**: Use as a starting point for more complex contracts
-- **Testing Patterns**: Reference for writing comprehensive test suites
-- **Deployment Patterns**: Example of proper deployment script structure
-
-## Contract Features
-
-### Functions
-- `set(uint256 x)` - Store a new value (costs gas)
-- `get()` - Retrieve current value (free to call)
-
-### Events
-- `DataStored(uint256 indexed value, address indexed sender)` - Emitted when value changes
-
-## Project Structure
-
-```
-smartcontract/
-├── contracts/
-│   └── SimpleStorage.sol      # Main smart contract
-├── scripts/
-│   └── deploy.js             # Deployment script
-├── test/
-│   └── SimpleStorage.test.js # Test suite
-├── hardhat.config.js         # Hardhat configuration
-├── package.json              # Dependencies and scripts
-└── .env.example              # Environment template
-```
-
-## Setup Instructions
+## Environment Setup
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Configure Environment
-```bash
-cp .env.example .env
-# Edit .env with your credentials:
-# - SEPOLIA_URL: Infura/Alchemy endpoint
-# - PRIVATE_KEY: Your wallet private key
-# - ETHERSCAN_API_KEY: For contract verification
+### 2. Set up Environment Variables
+Create a `.env` file in the project root:
+
+```env
+SEPOLIA_URL=https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID
+PRIVATE_KEY=your_private_key_here
+ETHERSCAN_API_KEY=your_etherscan_api_key_here
 ```
 
-### 3. Compile Contract
+### 3. Get Required API Keys
+
+#### Infura API Key
+1. Go to [Infura](https://infura.io/)
+2. Sign up for a free account
+3. Create a new project
+4. Copy the Project ID and replace `YOUR_INFURA_PROJECT_ID` in your `.env` file
+
+#### Etherscan API Key
+1. Go to [Etherscan](https://etherscan.io/)
+2. Create an account and log in
+3. Go to "API Keys" in your account dashboard
+4. Create a new API key
+5. Copy the API key and replace `your_etherscan_api_key_here` in your `.env` file
+
+#### Private Key
+1. Open MetaMask wallet
+2. Click on account menu → Account Details → Export Private Key
+3. Enter your password and copy the private key
+4. Replace `your_private_key_here` in your `.env` file
+⚠️ **WARNING**: Never share your private key or commit it to version control!
+
+## Deployment Commands
+
+### Compile the Contract
 ```bash
 npm run compile
 ```
 
-### 4. Run Tests
+### Run Tests
 ```bash
-npm test
+npm run test
 ```
 
-## Deployment
-
-### Testnet Deployment
+### Deploy to Sepolia Testnet
 ```bash
-# Deploy to Sepolia testnet
 npm run deploy:sepolia
-
-# Deploy to Goerli testnet  
-npm run deploy:goerli
 ```
 
-### Local Testing
+### Verify Contract on Etherscan
+After deployment, verify your contract:
 ```bash
-# Start local Hardhat node
-npx hardhat node
-
-# Deploy to local network
-npx hardhat run scripts/deploy.js --network localhost
+npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
 ```
 
-## Interaction Examples
+## Interacting with the Contract
 
-### Using Hardhat Console
-```bash
-npx hardhat console --network sepolia
-```
+### Via Etherscan
+1. Go to your contract on Sepolia Etherscan: `https://sepolia.etherscan.io/address/<CONTRACT_ADDRESS>`
+2. Click "Contract" tab to view verified source code
+3. Use "Read Contract" section to call `getString()` and `owner()`
+4. Connect your wallet and use "Write Contract" section to call owner-only functions
 
-```javascript
-// Get contract instance
-const SimpleStorage = await ethers.getContractFactory("SimpleStorage");
-const contract = SimpleStorage.attach("YOUR_CONTRACT_ADDRESS");
+### Functions Available on Etherscan
 
-// Read current value
-await contract.get();
+#### Read Functions (No gas required)
+- **getString**: Returns the currently stored string
+- **owner**: Returns the address of the contract owner
 
-// Store new value
-await contract.set(42);
+#### Write Functions (Requires gas + owner wallet)
+- **setString**: Update the stored string (owner only)
+- **transferOwnership**: Transfer contract ownership to a new address (owner only)
 
-// Listen for events
-contract.on("DataStored", (value, sender) => {
-  console.log(`Value ${value} stored by ${sender}`);
-});
-```
+## Security Features
 
-### Using Web3.js/Ethers.js
-```javascript
-// Store value
-const tx = await contract.set(123);
-await tx.wait();
+- **Access Control**: Only the deployer (owner) can modify the stored string
+- **Ownership Transfer**: Secure ownership transfer with zero-address protection
+- **Event Logging**: All actions are logged via events for transparency
+- **Public Reads**: Anyone can read the stored data without restrictions
 
-// Read value
-const value = await contract.get();
-console.log("Stored value:", value.toString());
-```
+## Example Usage
 
-## Testing
+1. **Deploy contract** → You become the owner
+2. **Set initial string**: Call `setString("Hello, World!")`
+3. **Read string**: Anyone can call `getString()` to see "Hello, World!"
+4. **Update string**: Only you can call `setString("Updated message")`
+5. **Transfer ownership**: Call `transferOwnership(newOwnerAddress)` if needed
 
-The test suite covers:
-- Initial state verification
-- Value storage and retrieval
-- Event emission verification
-- Gas usage optimization
-
-Run with: `npm test`
-
-## Security Considerations
-
-While this is a simple contract, consider these patterns for production:
-- Access controls (OpenZeppelin's Ownable)
-- Input validation
-- Reentrancy protection
-- Upgrade mechanisms
-
-## Educational Value
-
-This contract teaches:
-1. **State Variables**: How blockchain stores data permanently
-2. **Function Types**: view vs. state-changing functions
-3. **Events**: How to log data for off-chain consumption
-4. **Gas Costs**: Understanding transaction fees
-5. **Testing**: Writing comprehensive smart contract tests
-
-## Next Steps
-
-Extend this contract by adding:
-- Multiple storage slots
-- Access control mechanisms
-- Data structures (arrays, mappings)
-- Integration with other contracts
-- Frontend integration
-
-## Resources
-
-- [Hardhat Documentation](https://hardhat.org/docs)
-- [Solidity Documentation](https://docs.soliditylang.org)
-- [Ethereum Development](https://ethereum.org/developers)
-- [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts)
+## Contract Address
+Current deployment on Sepolia: `0xe079324c4095E9108EDf669c6A714a7CE1063094`
 
 ## License
-
 MIT

@@ -4,7 +4,7 @@ async function main() {
   const StringStorage = await hre.ethers.getContractFactory("StringStorage");
   const stringStorage = await StringStorage.deploy();
   
-  await simpleStorage.waitForDeployment();
+  await stringStorage.waitForDeployment();
   
   console.log("StringStorage deployed to:", await stringStorage.getAddress());
 }

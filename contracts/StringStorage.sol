@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-contract SimpleStorage {
-    uint256 private storedData;
+contract StringStorage {
+    string private storedString;
     address public owner;
     
-    event DataStored(uint256 indexed value, address indexed sender);
+    event StringStored(string indexed value, address indexed sender);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     
     modifier onlyOwner() {
@@ -18,9 +18,13 @@ contract SimpleStorage {
         emit OwnershipTransferred(address(0), msg.sender);
     }
     
-    function set(uint256 x) public onlyOwner {
-        storedData = x;
-        emit DataStored(x, msg.sender);
+    function setString(string memory newString) public onlyOwner {
+        storedString = newString;
+        emit StringStored(newString, msg.sender);
+    }
+    
+    function getString() public view returns (string memory) {
+        return storedString;
     }
     
     function transferOwnership(address newOwner) public onlyOwner {
@@ -28,9 +32,5 @@ contract SimpleStorage {
         address previousOwner = owner;
         owner = newOwner;
         emit OwnershipTransferred(previousOwner, newOwner);
-    }
-    
-    function get() public view returns (uint256) {
-        return storedData;
     }
 }
